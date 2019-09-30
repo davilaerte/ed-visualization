@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import MyCodeMirror from './MyCodeMirror';
 import * as d3 from 'd3'
 import './app.css';
+import request from "./config.js"
 
 class App extends Component {
   constructor(props) {
@@ -15,14 +16,10 @@ class App extends Component {
     this.initGraph = this.initGraph.bind(this);
 
     this.state = {
-      nodes: [
-        { id: 0, name: "d", reflexive: false , x: 1 , y: 4},
-        { id: 1, name: "b", reflexive: true , x: 1 , y: 4},
-        { id: 2, name: "v", reflexive: false , x: 1 , y: 4}
-      ],
-      links: [
-        { source: 0, target: 1, left: false, right: true }
-      ]
+      id: null,
+      insertNumber: '',
+      nodes: [],
+      links: []
     };
   }
 
@@ -88,8 +85,6 @@ class App extends Component {
       .style('marker-start', (d) => d.left ? 'url(#start-arrow)' : '')
       .style('marker-end', (d) => d.right ? 'url(#end-arrow)' : '')
       .merge(this.path);
-    console.log("QQUII");
-    console.log(this.state.nodes)
     this.circle = this.circle.data(this.state.nodes, (d) => d.id);
 
     this.circle.selectAll('circle')
@@ -111,7 +106,7 @@ class App extends Component {
       .attr('x', 0)
       .attr('y', 4)
       .attr('class', 'id')
-      .text((d) => d.id);
+      .text((d) => d.name);
 
     this.circle = g.merge(this.circle);
 
@@ -143,13 +138,40 @@ class App extends Component {
   }
 
   click = () => {
-    const link = {source: this.lastNodeId, target: ++this.lastNodeId, left: false, right: true };
-    const node = { id: this.lastNodeId, reflexive: false, x: 1, y: 4 };
-    const links = [...this.state.links];
-    const nodes = [...this.state.nodes]; 
-    links.push(link);
-    nodes.push(node);
-    this.setState({nodes: nodes, links: links}, () => this.restart());
+    request('/visualization?id=' + this.state.id, 'PUT', this.state.insertNumber, {
+      "Content-Type": "application/json"
+    }).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          this.setState({nodes: data.nodes, links: data.links}, () => this.restart());
+          this.setState({insertNumber: ''});
+        });
+      }
+    })
+  }
+
+  sendCode = () => {
+    request('/visualization', 'POST', this.state.code, {
+      "Content-Type": "application/json"
+    }).then(response => {
+      if (response.ok) {
+        response.text().then(data => {this.setState({id: data})});
+      }
+    })
+  }
+
+  updateCode = (newCode) => {
+    this.setState({
+		  code: newCode,
+		});
+  }
+
+  updateInsertNumber = (event) => {
+    const value = event.target.value;
+
+    this.setState({
+		  insertNumber: value,
+		});
   }
 
   render() {
@@ -159,10 +181,10 @@ class App extends Component {
           <h1>Visualização de Estuturas de Dados</h1>
         </div>
         <div className="java-editor">
-          <MyCodeMirror />
+          <MyCodeMirror code={this.state.code} updateCode={this.updateCode.bind(this)} />
         </div>
         <div className="text-right btn-run">
-          <button type="button" className="btn btn-success btn-lg" data-toggle="modal" data-target="#exampleModalCenter">Run >></button>
+          <button type="button" className="btn btn-success btn-lg" data-toggle="modal" data-target="#exampleModalCenter" onClick={this.sendCode.bind(this)}>Run >></button>
         </div>
 
         {/* modal */}
@@ -179,7 +201,7 @@ class App extends Component {
               </div>
               <div className="modal-footer">
                 <div className="input-group mb-3">
-                  <input type="text" className="form-control" placeholder="Recipient's username" aria-label="Recipient's username" aria-describedby="basic-addon2" />
+                  <input type="text" className="form-control" value={this.state.insertNumber} onChange={this.updateInsertNumber.bind(this)} />
                   <div className="input-group-append">
                     <button className="btn btn-outline-secondary" type="button" onClick={this.click.bind(this)}>Button</button>
                   </div>

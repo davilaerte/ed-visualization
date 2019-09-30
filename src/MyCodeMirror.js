@@ -8,18 +8,6 @@ import 'codemirror/addon/edit/matchbrackets.js'
 import 'codemirror/addon/hint/show-hint.js'
 
 class MyCodeMirror extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {};  
-  }
-
-  updateCode = (newCode) => {
-    this.setState({
-		  code: newCode,
-		});
-  }
-
   render() {
     var options = {
 		  lineNumbers: true,
@@ -29,7 +17,7 @@ class MyCodeMirror extends Component {
 		};
 
     return (
-      <CodeMirror ref="editor" value={this.state.code} onChange={this.updateCode} options={options}/>
+      <CodeMirror ref="editor" value={this.props.code} onChange={this.props.updateCode} options={options}/>
     );
   }
 }
