@@ -1,4 +1,4 @@
-const BACKEND_URL = "http://localhost:8080";
+const BACKEND_URL = "https://ebfccdf3.ngrok.io";
 
 export default function request(path, method, body, headers) {
     headers = new Headers(headers);
