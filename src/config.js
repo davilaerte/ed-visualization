@@ -1,4 +1,4 @@
-const BACKEND_URL = "https://24a73e78.ngrok.io";
+const BACKEND_URL = "";
 
 export default function request(path, method, body, headers) {
     headers = new Headers(headers);
