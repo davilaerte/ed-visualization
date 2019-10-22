@@ -15,7 +15,7 @@ class LinkedListLayout extends Component {
       insertNumber: '',
       nodes: [{id: 1, name: "5"}, {id: 2, name: "8"}],
       links: [{source: 1, target: 2, left: false, right: true}],
-      code: "public class LinkedList implements ILinkedList {\n  \tprivate LinkedListNode head;"
+      codeOptions: [{code:"public class LinkedList implements ILinkedList {\n  \tprivate LinkedListNode head;", isEdit: false, nLines: 2}, {code:"\n\tpublic void insert(Integer element) {", isEdit: false, nLines: 2}, {code:"\t\t/*Escreva seu código aqui*/", isEdit: true, nLines: 1}, {code:"\t}\n\n\tpublic void remove(Integer element) {", isEdit: false, nLines: 3}, {code:"\t\t/*Escreva seu código aqui*/", isEdit: true, nLines: 1}, {code:"\t}\n\n\tpublic LinkedListNode getHead() {\n\t\treturn this.head;\n\t}\n}", isEdit: false, nLines: 6}]
     };
   }
 
@@ -96,7 +96,7 @@ class LinkedListLayout extends Component {
     return (
       <div>
         <div className="java-editor">
-          <CodeEditor code={this.state.code} updateCode={this.updateCode.bind(this)} />
+          <CodeEditor codeOptions={this.state.codeOptions} code={this.state.code} updateCode={this.updateCode.bind(this)} />
         </div>
         <div className="text-right btn-run">
           <button type="button" className="btn btn-success btn-lg" data-toggle="modal" data-target="#exampleModalCenter" data-backdrop="static" data-keyboard="false" onClick={this.sendCode.bind(this)}>Run >></button>
