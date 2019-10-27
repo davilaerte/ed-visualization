@@ -79,6 +79,18 @@ text {
   pointer-events: none;
 }
 
+text.label {
+  font-size: 11px;
+  fill: red;
+  font-weight: bold;
+}
+
+text.label-node {
+  font-size: 16px;
+  fill: black;
+  font-weight: bold;
+}
+
 text.shadow {
   stroke: #FFF;
   stroke-width: 3px;

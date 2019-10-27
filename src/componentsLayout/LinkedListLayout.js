@@ -12,42 +12,14 @@ class LinkedListLayout extends Component {
 
     this.state = {
       id: null,
-      insertNumber: '',
-      nodes: [{id: 1, name: "5"}, {id: 2, name: "8"}],
-      links: [{source: 1, target: 2, left: false, right: true}],
-      codeOptions: [{code:"public class LinkedList implements ILinkedList {\n  \tprivate LinkedListNode head;", isEdit: false, nLines: 2}, {code:"\n\tpublic void insert(Integer element) {", isEdit: false, nLines: 2}, {code:"\t\t/*Escreva seu código aqui*/", isEdit: true, nLines: 1}, {code:"\t}\n\n\tpublic void remove(Integer element) {", isEdit: false, nLines: 3}, {code:"\t\t/*Escreva seu código aqui*/", isEdit: true, nLines: 1}, {code:"\t}\n\n\tpublic LinkedListNode getHead() {\n\t\treturn this.head;\n\t}\n}", isEdit: false, nLines: 6}]
+      selectAction: 'DEFAULT',
+      inputElement: '',
+      dsActions: {DEFAULT: {name: "Ação..."}, INSERT: {name: "Inserir elemento", hasElement: true}, REMOVE: {name: "Remover elemento", hasElement: true}},
+      nodes: [{id: 1, name: "5"}, {id: 2, name: "8"}, {id: 3, name: "7"}],
+      links: [{source: 1, target: 2, left: false, right: true}, {source: 3, target: 1, left: false, right: true}, {source: 2, target: 1, left: false, right: true}],
+      codeMethods: {insert: "\t\t/*Escreva seu código aqui*/", remove: "\t\t/*Escreva seu código aqui*/"},
+      codeOptions: [{code:"public class LinkedList implements ILinkedList {\n  \tprivate LinkedListNode head;", isEdit: false, nLines: 2}, {code:"\n\tpublic void insert(Integer element) {", isEdit: false, nLines: 2}, {isEdit: true, method: "insert", nLines: 1}, {code:"\t}\n\n\tpublic void remove(Integer element) {", isEdit: false, nLines: 3}, {isEdit: true, method: "remove", nLines: 1}, {code:"\t}\n\n\tpublic LinkedListNode getHead() {\n\t\treturn this.head;\n\t}\n}", isEdit: false, nLines: 6}]
     };
-  }
-
-  click = () => {
-    const nodes = [...this.state.nodes];
-    const links = [...this.state.links];
-    nodes.push({id: ++this.idCounter, name: this.state.insertNumber});
-    links.push({source: this.idCounter - 1, target: this.idCounter, left: false, right: true});
-    this.setState({nodes: nodes, links: links}, () => this.visualization.current.restart());
-    this.setState({insertNumber: ''});
-    /*request('/visualization?id=' + this.state.id, 'PUT', this.state.insertNumber, {
-      "Content-Type": "application/json"
-    }).then(response => {
-      if (response.ok) {
-        response.json().then(data => {
-          const nodes = [...this.state.nodes];
-          const links = [...this.state.links];
-          data.nodes.forEach( node => {
-            if (!this.containsObject(nodes, node)) {
-              nodes.push(node);
-            }
-          });
-          data.links.forEach( link => {
-            if (!this.containsObject(links, link)) {
-              links.push(link);
-            }
-          });
-          this.setState({nodes: nodes, links: links}, () => this.restart());
-          this.setState({insertNumber: ''});
-        });
-      }
-    })*/
   }
 
   containsObject = (list, obj) => {
@@ -65,30 +37,50 @@ class LinkedListLayout extends Component {
   }
 
   sendCode = () => {
-    request('/visualization', 'POST', this.state.code, {
+    request('/datas-structure-impl', 'POST', {implOptions: {tipo: "LINKED_LIST"}, implMethods: this.state.codeMethods}, {
       "Content-Type": "application/json"
     }).then(response => {
       if (response.ok) {
-        response.text().then(data => {this.setState({id: data})});
+        response.json().then(data => this.setState({id: data.id}));
+      } else {
+        response.json().then(data => console.log(data));
       }
     })
   }
 
-  updateCode = (newCode) => {
-    this.setState({
-		  code: newCode,
-		});
+  updateCode = (method, newCode) => {
+    let codeMethods = {...this.state.codeMethods};
+    codeMethods[method] = newCode;
+    this.setState({codeMethods: codeMethods});
   }
 
-  updateInsertNumber = (event) => {
-    const value = event.target.value;
+  updateSelectAction = (event) => {
+    this.setState({selectAction: event.target.value});
+  }
 
-    this.setState({
-		  insertNumber: value,
-		});
+  updateInputElement = (event) => {
+    this.setState({inputElement: event.target.value});
+  }
+
+  runMethod = (event) => {
+    event.preventDefault();
+
+    request('/datas-structure-impl', 'PUT', {options: {tipo: "LINKED_LIST", id: this.state.id}, nameMethod: this.state.selectAction, element: this.state.inputElement}, {
+      "Content-Type": "application/json"
+    }).then(response => {
+      if (response.ok) {
+        response.json().then(data => {
+          this.setState({nodes: data.nodes, links: data.links}, () => this.visualization.current.restart());
+          this.setState({inputElement: ''});
+        });
+      } else {
+        response.json().then(data => console.log(data));
+      }
+    })
   }
 
   closeModal = () => {
+    this.setState({selectAction: "DEFAULT", inputElement: ''});
     this.setState({nodes: [], links: []}, () => this.visualization.current.restart());
   }
 
@@ -96,10 +88,10 @@ class LinkedListLayout extends Component {
     return (
       <div>
         <div className="java-editor">
-          <CodeEditor codeOptions={this.state.codeOptions} code={this.state.code} updateCode={this.updateCode.bind(this)} />
+          <CodeEditor codeOptions={this.state.codeOptions} codeMethods={this.state.codeMethods} updateCode={this.updateCode.bind(this)} />
         </div>
         <div className="text-right btn-run">
-          <button type="button" className="btn btn-success btn-lg" data-toggle="modal" data-target="#exampleModalCenter" data-backdrop="static" data-keyboard="false" onClick={this.sendCode.bind(this)}>Run >></button>
+          <button type="button" className="btn btn-success btn-lg" data-toggle="modal" data-target="#exampleModalCenter" data-backdrop="static" data-keyboard="false" onClick={this.sendCode.bind(this)}>Visualizar implementação</button>
         </div>
 
         {/* modal */}
@@ -116,11 +108,31 @@ class LinkedListLayout extends Component {
                 <Visualization ref={this.visualization} nodes={this.state.nodes} links={this.state.links}/>
               </div>
               <div className="modal-footer">
-                <div className="input-group mb-3">
-                  <input type="text" className="form-control" value={this.state.insertNumber} onChange={this.updateInsertNumber.bind(this)} />
-                  <div className="input-group-append">
-                    <button className="btn btn-outline-secondary" type="button" onClick={this.click.bind(this)}>Insert Element</button>
-                  </div>
+                <div className="container-fluid">
+                  <form onSubmit={this.runMethod.bind(this)}>
+                    <div className="form-row mt-2">
+                      <div className="col-1"></div>
+                      <label className="col-form-label col-2">Escolha uma ação:</label>
+                      <div className="col-6">
+                        <select className="custom-select" value={this.state.selectAction} onChange={this.updateSelectAction.bind(this)}>
+                          {Object.keys(this.state.dsActions).map( (action, index) => <option key={index} value={action}>{this.state.dsActions[action].name}</option> )}
+                        </select>
+                      </div>
+                      <div className="col-4"></div>
+                    </div>
+                    {this.state.selectAction !== 'DEFAULT' ? 
+                      <div className="form-row mt-4">
+                        <div className="col-3"></div>
+                        {this.state.dsActions[this.state.selectAction].hasElement ? 
+                          <div className="col-4">
+                            <input value={this.state.inputElement} onChange={this.updateInputElement.bind(this)} type="number" className="form-control" placeholder="Elemento..."></input>
+                          </div> : undefined
+                        }
+                        <div className={this.state.dsActions[this.state.selectAction].hasElement ? "col-2": "col-6"}>
+                          <button type="submit" className="btn btn-dark btn-block" disabled={this.state.inputElement === ''}>{this.state.dsActions[this.state.selectAction].name}</button>
+                        </div>
+                      </div> : undefined}
+                  </form>
                 </div>
               </div>
             </div>

@@ -35,7 +35,7 @@ class CodeEditor extends Component {
     this.setState(lines);
   }
 
-  updateLine = (line) => {
+  updateLineAndCode = (line, method, newCode) => {
     let lines = {};
 
     for (let i = line + 1; i < this.props.codeOptions.length; i++) {
@@ -43,6 +43,7 @@ class CodeEditor extends Component {
     }
 
     this.setState(lines);
+    this.props.updateCode(method, newCode);
   }
 
   getNumberLinesAdd = (line) => {
@@ -80,7 +81,7 @@ class CodeEditor extends Component {
     return (
       <div>
         {this.props.codeOptions.map((elem, index) =>
-          elem.isEdit ? <CodeMirror key={index} ref={this["codeMirror_" + index]} value={elem.code} onChange={this.updateLine.bind(this, index)} options={this.getOptionsLine(index, elem.isEdit)}/>:<CodeMirror key={index} value={elem.code} options={this.getOptionsLine(index, elem.isEdit)}/>
+          elem.isEdit ? <CodeMirror key={index} ref={this["codeMirror_" + index]} value={this.props.codeMethods[elem.method]} onChange={this.updateLineAndCode.bind(this, index, elem.method)} options={this.getOptionsLine(index, elem.isEdit)}/>:<CodeMirror key={index} value={elem.code} options={this.getOptionsLine(index, elem.isEdit)}/>
         )}
       </div>
     );
