@@ -15,8 +15,8 @@ class LinkedListLayout extends Component {
       selectAction: 'DEFAULT',
       inputElement: '',
       dsActions: {DEFAULT: {name: "Ação..."}, INSERT: {name: "Inserir elemento", hasElement: true}, REMOVE: {name: "Remover elemento", hasElement: true}},
-      nodes: [{id: 1, name: "5"}, {id: 2, name: "8"}, {id: 3, name: "7"}],
-      links: [{source: 1, target: 2, left: false, right: true}, {source: 3, target: 1, left: false, right: true}, {source: 2, target: 1, left: false, right: true}],
+      nodes: [{id: 1, name: "5", label: "HEAD"}, {id: 2, name: "8"}, {id: 3, name: "7", label: "TAIL"}],
+      links: [{source: 1, target: 2, left: false, right: true, label: "next"}, {source: 1, target: 2, left: false, right: true, label: "prev"}, {source: 3, target: 1, left: false, right: true, label: "next"}, {source: 2, target: 1, left: false, right: true, label: "prev"}, {source: 2, target: 1, left: false, right: true, label: "next"}, {source: 1, target: 1, left: false, right: true, label: "next"}, {source: 1, target: 1, left: false, right: true, label: "prev"}],
       codeMethods: {insert: "\t\t/*Escreva seu código aqui*/", remove: "\t\t/*Escreva seu código aqui*/"},
       codeOptions: [{code:"public class LinkedList implements ILinkedList {\n  \tprivate LinkedListNode head;", isEdit: false, nLines: 2}, {code:"\n\tpublic void insert(Integer element) {", isEdit: false, nLines: 2}, {isEdit: true, method: "insert", nLines: 1}, {code:"\t}\n\n\tpublic void remove(Integer element) {", isEdit: false, nLines: 3}, {isEdit: true, method: "remove", nLines: 1}, {code:"\t}\n\n\tpublic LinkedListNode getHead() {\n\t\treturn this.head;\n\t}\n}", isEdit: false, nLines: 6}]
     };

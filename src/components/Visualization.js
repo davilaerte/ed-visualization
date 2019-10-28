@@ -14,8 +14,8 @@ class Visualization extends Component {
 
     this.nodes = [];
 
-    this.nodeInitX = 20;
-    this.nodeInitY = 40;
+    this.nodeInitX = 70;
+    this.nodeInitY = 70;
     this.stepX = 150;
     this.stepY = 150;
     this.nodesPerLine = 8;
@@ -70,7 +70,7 @@ class Visualization extends Component {
   }
 
   restart = () => {
-    this.path = this.path.data(this.props.links);
+    this.path = this.path.data(this.props.links, (d) => `${d.source.id}-${d.target.id}-${d.label}`);
 
     this.path.style('marker-start', (d) => d.left ? 'url(#start-arrow)' : '')
       .style('marker-end', (d) => d.right ? 'url(#end-arrow)' : '');
@@ -83,23 +83,17 @@ class Visualization extends Component {
       .style('marker-end', (d) => d.right ? 'url(#end-arrow)' : '')
 
     p.append("title")
-      .text("next");  
-    
+      .text((d) => d.label);
+
     this.path = p.merge(this.path);
     
     this.nodes = this.getNodesWithPosition();
 
-    this.circle = this.circle.data(this.nodes, (d) => d.id);
-
-    this.circle.selectAll('circle')
-      .style('fill', (d) => this.colors(d.id))
-      .classed('reflexive', (d) => d.reflexive);
-
+    this.circle = this.circle.data(this.nodes, (d) => `${d.id}-${d.name}`);
+    
     this.circle.exit().remove();
 
     const g = this.circle.enter().append('svg:g');
-
-    g.call(this.drag());
 
     g.append('svg:circle')
       .attr('class', 'node')
@@ -112,27 +106,29 @@ class Visualization extends Component {
       .attr('y', 4)
       .attr('class', 'id')
       .text((d) => d.name);
+    
+    g.call(this.drag());
 
     this.circle = g.merge(this.circle);
 
-    this.labels = this.labels.data(this.props.links);
+    this.labels = this.labels.data(this.props.links, (d) => `${d.source.id}-${d.target.id}-${d.label}`);
 
     this.labels.exit().remove();
 
     this.labels = this.labels.enter().append('svg:text')
-       .attr('class', 'label')
-       .text("next")
+       .attr('class', (d) => d.label === 'next'? 'label-next':'label-prev')
+       .text((d) => d.label)
        .merge(this.labels);
     
-    this.nodesWithLabels = this.getNodeLabels(this.nodes);
+    this.nodesWithLabels = this.nodes.filter((node) => node.label != null);
 
-    this.labelsNodes = this.labelsNodes.data(this.nodesWithLabels);
+    this.labelsNodes = this.labelsNodes.data(this.nodesWithLabels, (d) => `${d.id}-${d.label}`);
 
     this.labelsNodes.exit().remove();
 
     this.labelsNodes = this.labelsNodes.enter().append('svg:text')
        .attr('class', 'label-node')
-       .text((d) => d.text)
+       .text((d) => d.label)
        .merge(this.labelsNodes);
 
     this.force
@@ -159,7 +155,16 @@ class Visualization extends Component {
       const cpX = (sourceX + ((targetY - sourceY) * 0.3));
       const cpY = (sourceY + ((sourceX - targetX) * 0.3));
 
-      return `M${sourceX},${sourceY}Q${cpX},${cpY},${targetX},${targetY}`;
+      if (d.source.id === d.target.id) {
+        const cpOneX = d.source.x - 100;
+        const cpOneY = d.source.y;
+        const cpTwoX = d.source.x;
+        const cpTwoY = d.source.y - 100;
+
+        return `M${d.source.x},${d.source.y}C${cpOneX},${cpOneY},${cpTwoX},${cpTwoY},${d.target.x},${d.target.y - 18}`;
+      } else {
+        return `M${sourceX},${sourceY}Q${cpX},${cpY},${targetX},${targetY}`;
+      }
     });
 
     this.circle.attr('transform', (d) =>  {
@@ -169,13 +174,31 @@ class Visualization extends Component {
     this.labels.attr('x', (d) => {
       const cpX = (d.source.x + ((d.target.y - d.source.y) * 0.36));
       const middleX = (d.source.x + d.target.x)/2;
-      return (middleX + cpX)/2;
+      
+      if (d.source.id === d.target.id) {
+        if (d.label === "prev") {
+          return d.source.x - 25;
+        } else {
+          return d.source.x - 50;
+        } 
+      } else {
+        if (d.label === "prev") {
+          return ((middleX + cpX)/2) + 25;
+        } else {
+          return (middleX + cpX)/2;
+        }
+      }
     });
 
     this.labels.attr('y', (d) => {
       const cpY = (d.source.y + ((d.source.x - d.target.x) * 0.36));
       const middleY = (d.source.y + d.target.y)/2;
-      return (middleY + cpY)/2;
+      
+      if (d.source.id === d.target.id) {
+        return d.source.y - 55; 
+      } else {
+        return (middleY + cpY)/2;
+      }
     });
 
     this.labelsNodes.attr('x', (d) => {
@@ -206,23 +229,6 @@ drag = () => {
       elem.fy = this.nodeInitY + (Math.floor(index/this.nodesPerLine) * this.stepY);
       return elem;
     });
-  }
-
-  getNodeLabels = (nodes) => {
-    const sortedNodes = nodes.sort((a, b) => a.id - b.id);
-    let nodesLabels = [];
-
-    if (sortedNodes.length >= 1) {
-      sortedNodes[0].text = "HEAD";
-      nodesLabels.push(sortedNodes[0]);
-    }
-    
-    if (sortedNodes.length >= 2) {
-      sortedNodes[sortedNodes.length - 1].text = "LAST";
-      nodesLabels.push(sortedNodes[sortedNodes.length - 1]);
-    }
-
-    return nodesLabels;
   }
 
   render() {
