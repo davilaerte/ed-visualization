@@ -3,15 +3,15 @@ import CodeEditor from '../components/CodeEditor.js';
 import '../styles/d3.css';
 import request from "../config.js"
 import Visualization from '../components/Visualization.js';
+import $ from 'jquery';
 
 class LinkedListLayout extends Component {
   constructor(props) {
     super(props);
     this.visualization = React.createRef();
-    this.idCounter = 2;
 
     this.state = {
-      id: null,
+      errorData: {message: ""},
       selectAction: 'DEFAULT',
       inputElement: '',
       dsActions: {DEFAULT: {name: "Ação..."}, INSERT: {name: "Inserir elemento", hasElement: true}, REMOVE: {name: "Remover elemento", hasElement: true}},
@@ -22,28 +22,16 @@ class LinkedListLayout extends Component {
     };
   }
 
-  containsObject = (list, obj) => {
-    for(let i = 0; i < list.length; i++) {
-      let keysObj = Object.keys(obj);
-      let found = true;
-      for(let j = 0; j < keysObj.length; j++) {
-        if (list[i][keysObj[j]] !== obj[keysObj[j]]) {
-          found = false;
-        }
-      }
-      if (found)
-        return true;
-    }
-  }
-
   sendCode = () => {
     request('/datas-structure-impl', 'POST', {implOptions: {tipo: "LINKED_LIST"}, implMethods: this.state.codeMethods}, {
       "Content-Type": "application/json"
     }).then(response => {
       if (response.ok) {
+        $('#modalVisualization').modal({backdrop: "static", keyboard: false, show: true});
         response.json().then(data => this.setState({id: data.id}));
       } else {
-        response.json().then(data => console.log(data));
+        $('#modalError').modal({backdrop: "static", keyboard: false, show: true});
+        response.json().then(data => this.setState({errorData: data}, () => console.log(this.state.errorData)));
       }
     })
   }
@@ -74,7 +62,8 @@ class LinkedListLayout extends Component {
           this.setState({inputElement: ''});
         });
       } else {
-        response.json().then(data => console.log(data));
+        $('#modalError').modal({backdrop: "static", keyboard: false, show: true});
+        response.json().then(data => this.setState({errorData: data}));
       }
     })
   }
@@ -91,15 +80,15 @@ class LinkedListLayout extends Component {
           <CodeEditor codeOptions={this.state.codeOptions} codeMethods={this.state.codeMethods} updateCode={this.updateCode.bind(this)} />
         </div>
         <div className="text-right btn-run">
-          <button type="button" className="btn btn-success btn-lg" data-toggle="modal" data-target="#exampleModalCenter" data-backdrop="static" data-keyboard="false" onClick={this.sendCode.bind(this)}>Visualizar implementação</button>
+          <button type="button" className="btn btn-success btn-lg" onClick={this.sendCode.bind(this)}>Visualizar implementação</button>
         </div>
 
-        {/* modal */}
-        <div className="modal fade" id="exampleModalCenter" tabIndex="-1" role="dialog" aria-hidden="true">
-          <div className="modal-dialog modal-xl modal-visualization" role="document">
-            <div className="modal-content">
+        {/* Modal Visualization */}
+        <div className="modal fade" id="modalVisualization" tabIndex="-1" role="dialog" aria-hidden="true">
+          <div className="modal-dialog modal-xl" role="document">
+            <div className="modal-content modal-visualization">
               <div className="modal-header">
-                <h4 className="modal-title text-center">Visualização</h4>
+                <h3 className="font-weight-light modal-title">Visualizar Implementação - Linked List</h3>
                 <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.closeModal.bind(this)}>
                   <span aria-hidden="true">&times;</span>
                 </button>
@@ -134,6 +123,31 @@ class LinkedListLayout extends Component {
                       </div> : undefined}
                   </form>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/*Modal Error*/}
+        <div className="modal fade" id="modalError" role="dialog" aria-hidden="true">
+          <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div className="modal-content modal-error">
+              <div className="modal-header">
+                <h4 className="modal-title modal-error-title">{`Falha ao tentar ${this.state.errorData.errorType === "COMPILATION" ? "compilar":"executar"} o código!`}</h4>
+                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                <div className="wrap-error">
+                  <h5><p>Os seguintes erros foram encontrados: </p></h5>
+                  <p className="font-italic text-error" style={{width: (this.state.errorData.message.length * 0.2) + "rem"}}>
+                    {this.state.errorData.message}
+                  </p>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-danger" data-dismiss="modal">Close</button>
               </div>
             </div>
           </div>

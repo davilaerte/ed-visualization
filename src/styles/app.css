@@ -14,6 +14,12 @@ h2 {
   font-size: 15px;
 }
 
+h3 {
+  text-align: center;
+  font-style: italic;
+  margin-left: 300px;
+}
+
 .ds-card {
   width: 35rem;
 }
@@ -38,6 +44,27 @@ h2 {
 
 .modal-visualization {
   margin-top: 0.5rem;
+  background-color: #e0dede;
+  border-color: #343a40;
+}
+
+.modal-error {
+  background-color:white;
+  border-color: red;
+}
+
+.wrap-error {
+  overflow-y: hidden;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+.text-error {
+  word-spacing: 0.225rem;
+}
+
+.modal-error-title {
+  color: red;
 }
 
 .click {

@@ -14,11 +14,11 @@ class Visualization extends Component {
 
     this.nodes = [];
 
-    this.nodeInitX = 70;
+    this.nodeInitX = 55;
     this.nodeInitY = 70;
     this.stepX = 150;
-    this.stepY = 150;
-    this.nodesPerLine = 8;
+    this.stepY = 110;
+    this.nodesPerLine = 7;
   }
 
   componentDidMount() {
@@ -140,29 +140,30 @@ class Visualization extends Component {
 
   tick = () => {
     this.path.attr('d', (d) => {
-      const deltaX = d.target.x - d.source.x;
-      const deltaY = d.target.y - d.source.y;
-      const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-      const normX = deltaX / dist;
-      const normY = deltaY / dist;
-      const sourcePadding = d.left ? 18 : 13;
-      const targetPadding = d.right ? 18 : 13;
-      const sourceX = d.source.x + (sourcePadding * normX);
-      const sourceY = d.source.y + (sourcePadding * normY);
-      const targetX = d.target.x - (targetPadding * normX);
-      const targetY = d.target.y - (targetPadding * normY);
-
-      const cpX = (sourceX + ((targetY - sourceY) * 0.3));
-      const cpY = (sourceY + ((sourceX - targetX) * 0.3));
-
       if (d.source.id === d.target.id) {
         const cpOneX = d.source.x - 100;
         const cpOneY = d.source.y;
         const cpTwoX = d.source.x;
         const cpTwoY = d.source.y - 100;
+        const targetYWithPadding = d.target.y - 18;
 
-        return `M${d.source.x},${d.source.y}C${cpOneX},${cpOneY},${cpTwoX},${cpTwoY},${d.target.x},${d.target.y - 18}`;
+        return `M${d.source.x},${d.source.y}C${cpOneX},${cpOneY},${cpTwoX},${cpTwoY},${d.target.x},${targetYWithPadding}`;
       } else {
+        const deltaX = d.target.x - d.source.x;
+        const deltaY = d.target.y - d.source.y;
+        const dist = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        const normX = deltaX / dist;
+        const normY = deltaY / dist;
+        const sourcePadding = d.left ? 18 : 13;
+        const targetPadding = d.right ? 18 : 13;
+        const sourceX = d.source.x + (sourcePadding * normX);
+        const sourceY = d.source.y + (sourcePadding * normY);
+        const targetX = d.target.x - (targetPadding * normX);
+        const targetY = d.target.y - (targetPadding * normY);
+
+        const cpX = (sourceX + ((targetY - sourceY) * 0.3));
+        const cpY = (sourceY + ((sourceX - targetX) * 0.3));
+
         return `M${sourceX},${sourceY}Q${cpX},${cpY},${targetX},${targetY}`;
       }
     });
@@ -171,42 +172,43 @@ class Visualization extends Component {
       return `translate(${d.x},${d.y})`
     });
 
-    this.labels.attr('x', (d) => {
-      const cpX = (d.source.x + ((d.target.y - d.source.y) * 0.36));
-      const middleX = (d.source.x + d.target.x)/2;
-      
+    this.labels.attr('x', (d) => {      
       if (d.source.id === d.target.id) {
-        if (d.label === "prev") {
-          return d.source.x - 25;
-        } else {
-          return d.source.x - 50;
-        } 
+        const marginX = d.label === "prev" ? 25:50;
+        
+        return d.source.x - marginX;
       } else {
-        if (d.label === "prev") {
-          return ((middleX + cpX)/2) + 25;
-        } else {
-          return (middleX + cpX)/2;
-        }
+        const cpX = (d.source.x + ((d.target.y - d.source.y) * 0.36));
+        const middleX = (d.source.x + d.target.x)/2;
+        const marginX = d.label === "prev" ? 25:0;
+        
+        return (middleX + cpX)/2 + marginX;
       }
     });
 
     this.labels.attr('y', (d) => {
-      const cpY = (d.source.y + ((d.source.x - d.target.x) * 0.36));
-      const middleY = (d.source.y + d.target.y)/2;
-      
       if (d.source.id === d.target.id) {
-        return d.source.y - 55; 
+        const marginY = 55;
+
+        return d.source.y - marginY; 
       } else {
+        const cpY = (d.source.y + ((d.source.x - d.target.x) * 0.36));
+        const middleY = (d.source.y + d.target.y)/2;
+
         return (middleY + cpY)/2;
       }
     });
 
     this.labelsNodes.attr('x', (d) => {
-      return d.x - 15;
+      const marginX = 15;
+
+      return d.x - marginX;
     });
 
     this.labelsNodes.attr('y', (d) => {
-      return d.y + 35;
+      const marginY = 35;
+
+      return d.y + marginY;
     });
   }
 
