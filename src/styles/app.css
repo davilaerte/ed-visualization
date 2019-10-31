@@ -32,8 +32,16 @@ h3 {
   margin-right: 40px; 
 }
 
+.btn-node {
+  margin-left: 40px; 
+}
+
+.info-ds {
+  margin: 0px 40px;
+}
+
 .java-editor {
-  border: 1px solid #868686;
+  border: 1px solid black;
   margin: 20px 40px;
   font-size: 1.3rem;
   font-weight: 400;
@@ -41,6 +49,17 @@ h3 {
   color: #212529;
   text-align: left;
 }
+
+.java-code {
+  border: 1px solid blue;
+  margin: 20px 40px;
+  font-size: 1.3rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #212529;
+  text-align: left;
+}
+
 
 .modal-visualization {
   margin-top: 0.5rem;

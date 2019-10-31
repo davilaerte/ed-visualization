@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import CodeMirror from 'react-codemirror';
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/addon/hint/show-hint.css'
-import 'codemirror/theme/eclipse.css'
 import 'codemirror/mode/clike/clike.js'
 import 'codemirror/addon/edit/matchbrackets.js'
 import 'codemirror/addon/hint/show-hint.js'
@@ -20,6 +19,7 @@ class CodeEditor extends Component {
 
   startLines = () => {
     let lines = {};
+    let indexMethods = {};
 
     this.props.codeOptions.reduce((accLines, opt, index) => {
       lines["line_" + index] = accLines;
@@ -27,23 +27,31 @@ class CodeEditor extends Component {
 
       if (opt.isEdit) {
         this["codeMirror_" + index] = React.createRef();
+        indexMethods[opt.method] = index;
       }
 
       return accLines + opt.nLines;
     }, 1);
 
     this.setState(lines);
+    this.setState({indexMethods});
   }
 
-  updateLineAndCode = (line, method, newCode) => {
+  updateLineAndCode = (line, method, isDefaultCode, newCode) => {
     let lines = {};
+    let lineMethods = {};
 
     for (let i = line + 1; i < this.props.codeOptions.length; i++) {
       lines["line_" + i] = this.state["base_line_" + i] + this.getNumberLinesAdd(i);
+      
+      if (this.props.codeOptions[i].isEdit) {
+        lineMethods[this.props.codeOptions[i].method] = lines["line_" + i];
+      }
     }
 
-    this.setState(lines);
-    this.props.updateCode(method, newCode);
+    this.setState(lines, () => {
+      this.props.updateCode(method, newCode, lineMethods, isDefaultCode);
+    });
   }
 
   getNumberLinesAdd = (line) => {
@@ -76,12 +84,23 @@ class CodeEditor extends Component {
 
     return options;
   }
+
+  setMethodValues = (methodValues) => {
+    let method;
+    for (method in methodValues) {
+      let indexMethod = this.state.indexMethods[method];
+      this["codeMirror_" + indexMethod].current.getCodeMirror().doc.setValue(methodValues[method]);
+    }
+
+    let minIndexMethod = Math.min(...Object.values(this.state.indexMethods));
+    this.updateLineAndCode(minIndexMethod, null, true, null);
+  }
   
   render() {
     return (
       <div>
         {this.props.codeOptions.map((elem, index) =>
-          elem.isEdit ? <CodeMirror key={index} ref={this["codeMirror_" + index]} value={this.props.codeMethods[elem.method]} onChange={this.updateLineAndCode.bind(this, index, elem.method)} options={this.getOptionsLine(index, elem.isEdit)}/>:<CodeMirror key={index} value={elem.code} options={this.getOptionsLine(index, elem.isEdit)}/>
+          elem.isEdit ? <CodeMirror key={index} ref={this["codeMirror_" + index]} value={this.props.codeMethods[elem.method]} onChange={this.updateLineAndCode.bind(this, index, elem.method, false)} options={this.getOptionsLine(index, elem.isEdit)}/>:<CodeMirror key={index} value={elem.code} options={this.getOptionsLine(index, elem.isEdit)}/>
         )}
       </div>
     );
