@@ -39,18 +39,13 @@ class CodeEditor extends Component {
 
   updateLineAndCode = (line, method, isDefaultCode, newCode) => {
     let lines = {};
-    let lineMethods = {};
 
     for (let i = line + 1; i < this.props.codeOptions.length; i++) {
       lines["line_" + i] = this.state["base_line_" + i] + this.getNumberLinesAdd(i);
-      
-      if (this.props.codeOptions[i].isEdit) {
-        lineMethods[this.props.codeOptions[i].method] = lines["line_" + i];
-      }
     }
 
     this.setState(lines, () => {
-      this.props.updateCode(method, newCode, lineMethods, isDefaultCode);
+      this.props.updateCode(method, newCode, isDefaultCode);
     });
   }
 
