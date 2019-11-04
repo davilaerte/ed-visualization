@@ -8,7 +8,7 @@ class ModalVisualization extends Component {
           <div className="modal-content modal-visualization">
             <div className="modal-header">
               <h3 className="font-weight-light modal-title">Visualizar Implementação - {this.props.dsName}</h3>
-              <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={this.props.closeModal.bind(this)}>
+              <button type="button" className="close" aria-label="Close" onClick={this.props.closeModal.bind(this)}>
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
@@ -32,12 +32,12 @@ class ModalVisualization extends Component {
                     <div className="form-row mt-4">
                       <div className="col-3"></div>
                       {this.props.dsActions[this.props.selectAction].hasElement ? 
-                        <div className="col-4">
+                        <div className="col-3">
                           <input value={this.props.inputElement} onChange={this.props.updateInputElement.bind(this)} type="number" className="form-control" placeholder="Elemento..."></input>
                         </div> : undefined
                       }
-                      <div className={this.props.dsActions[this.props.selectAction].hasElement ? "col-2": "col-6"}>
-                        <button type="submit" className="btn btn-dark btn-block" disabled={this.props.inputElement === ''}>{this.props.dsActions[this.props.selectAction].name}</button>
+                      <div className={this.props.dsActions[this.props.selectAction].hasElement ? "col-3": "col-6"}>
+                        <button type="submit" className="btn btn-dark btn-block" disabled={this.props.runLoading || (this.props.inputElement === '' && this.props.dsActions[this.props.selectAction].hasElement)}>{this.props.dsActions[this.props.selectAction].name}</button>
                       </div>
                       <div className="col-2"></div>
                       <div className="col-1">

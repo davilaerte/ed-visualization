@@ -16,9 +16,10 @@ class Visualization extends Component {
 
     this.nodeInitX = 55;
     this.nodeInitY = 70;
-    this.stepX = 150;
+    this.stepX = 140;
     this.stepY = 110;
-    this.nodesPerLine = 7;
+    this.nodesPerLine = 8;
+    this.nodeFinalX = this.nodeInitX + ((this.nodesPerLine - 1) * this.stepX);
   }
 
   componentDidMount() {
@@ -180,7 +181,7 @@ class Visualization extends Component {
       } else {
         const cpX = (d.source.x + ((d.target.y - d.source.y) * 0.36));
         const middleX = (d.source.x + d.target.x)/2;
-        const marginX = d.label === "prev" ? 25:0;
+        const marginX = d.label === "prev" ? -25:0;
         
         return (middleX + cpX)/2 + marginX;
       }
@@ -200,7 +201,7 @@ class Visualization extends Component {
     });
 
     this.labelsNodes.attr('x', (d) => {
-      const marginX = 15;
+      const marginX = 12;
 
       return d.x - marginX;
     });
@@ -227,8 +228,11 @@ drag = () => {
     let copyNodes = JSON.parse(JSON.stringify(this.props.nodes));
 
     return copyNodes.sort((a,b) => a.id - b.id).map((elem, index) => {
-      elem.fx = this.nodeInitX + (this.stepX * (index%this.nodesPerLine));
-      elem.fy = this.nodeInitY + (Math.floor(index/this.nodesPerLine) * this.stepY);
+      const levelY = Math.floor(index/this.nodesPerLine);
+      const deltaX = (this.stepX * (index%this.nodesPerLine));
+      
+      elem.fx = levelY%2 === 0 ? this.nodeInitX + deltaX:this.nodeFinalX - deltaX;
+      elem.fy = this.nodeInitY + (levelY * this.stepY);
       return elem;
     });
   }

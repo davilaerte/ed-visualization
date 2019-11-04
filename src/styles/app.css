@@ -72,6 +72,11 @@ h3 {
   border-color: red;
 }
 
+.modal-warning {
+  background-color:white;
+  border-color: darkgoldenrod;
+}
+
 .wrap-error {
   overflow-y: hidden;
   overflow-x: auto;
@@ -84,6 +89,10 @@ h3 {
 
 .modal-error-title {
   color: red;
+}
+
+.modal-warning-title {
+  color: darkgoldenrod;
 }
 
 .click {

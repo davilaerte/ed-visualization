@@ -19,13 +19,13 @@ class ModalError extends Component {
                   {this.props.errorData.message}
                 </p>
 
-                {this.props.errorData.stackTrace != null ? 
+                {this.props.errorData.stackTrace != null || this.props.errorData.methodName !=null ? 
                 <div>
                   <br/>
                   <h5><p>Informações sobre o erro: </p></h5>
                   <p className="font-italic text-error">
-                    {`Método: ${this.props.errorData.stackTrace.methodName}`}<br/>
-                    {`Linha: ${this.props.errorData.stackTrace.lineNumber}`}
+                    {`Método: ${this.props.errorData.methodName || this.props.errorData.stackTrace.methodName}`}<br/>
+                    {this.props.errorData.methodName != null ? '':`Linha: ${this.props.errorData.stackTrace.lineNumber}`}
                   </p>
                 </div>:undefined}
               </div>
